@@ -59,7 +59,7 @@ class ReDial(InMemoryDataset):
                 reason_path=train_reason_path
             else:
                 reason_path=test_reason_path
-            for idx in tqdm(range(len(reason_path))):
+            for idx in tqdm(range(len(reason_path)), bar_format=' {percentage:3.0f} % | {bar:23} {r_bar}'):
                 last_turn=0
                 if idx==len(reason_path)-1:
                     last_turn=1

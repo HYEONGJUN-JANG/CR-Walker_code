@@ -30,7 +30,7 @@ class Graph_Embedder(nn.Module):
 
 
     def forward(self,edge_type,edge_index):
-        graph_features=torch.relu(self.gcn1(self.init_features,edge_index,edge_type))
+        graph_features=torch.relu(self.gcn1(self.init_features,edge_index.long(),edge_type))
 
 
         if self.word_net:
