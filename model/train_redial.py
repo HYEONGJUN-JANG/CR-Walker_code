@@ -41,11 +41,11 @@ parser.add_argument("--lr", type=float, default=5e-4)
 parser.add_argument("--weight_decay", type=float, default=0.01)
 parser.add_argument("--eval_batch", type=int, default=100)
 parser.add_argument("--word_net", action='store_true')
-<<<<<<< HEAD
-=======
+
 parser.add_argument("--save_conv_name", type=str, default='', help="if any string , it save conversation in test ")
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
+
 t_args = parser.parse_args()
+# t_args.save_conv_name=' '
 if t_args.save_conv_name:
     args['save_conv_name'] = t_args.save_conv_name
     print("Test Conv Log File : ",args.get('save_conv_name'))
@@ -53,17 +53,13 @@ print(t_args)
 # exit()
 # t_args.option = 'test_gen'
 
-<<<<<<< HEAD
 # t_args.option = 'test_gen'
 
 option = t_args.option
 model_name = t_args.model_name
 
-=======
 option = t_args.option
 model_name = t_args.model_name
-
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 save_path = osp.join(root, "saved", "best_model_" + t_args.model_name + ".pt")
 save_path_1 = osp.join(root, "saved", "best_model_" + t_args.model_name + "_1.pt")
@@ -76,13 +72,11 @@ redial_graph = ReDial(path, flag="graph")
 redial_rec = ReDial(path, flag="rec")
 graph_data = redial_graph[0]
 # HJ: default batch_size=20
-<<<<<<< HEAD
-train_loader = DataLoader(redial_train, batch_size=400, shuffle=True)
+# train_loader = DataLoader(redial_train, batch_size=400, shuffle=True) # HJ KT-server
+train_loader = DataLoader(redial_train, batch_size=4, shuffle=True) # HJ local
 test_loader = DataLoader(redial_test, batch_size=4, shuffle=False)
-=======
-train_loader = DataLoader(redial_train, batch_size=200, shuffle=True)
-test_loader = DataLoader(redial_test, batch_size=200, shuffle=False)
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
+# train_loader = DataLoader(redial_train, batch_size=200, shuffle=True) # Default
+# test_loader = DataLoader(redial_test, batch_size=200, shuffle=False) # Default
 
 add_generic_args()
 
@@ -213,11 +207,9 @@ elif t_args.option == "test":
     prorec.load_state_dict(state_dict, strict=False)
     prorec.eval()
     prorec.to(device)
-<<<<<<< HEAD
-    evaluate_rec_redial(test_loader, prorec, graph_data, args)
-=======
+
     evaluate_rec_redial(test_loader, prorec, graph_data, args,t_args)
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
+
 
 elif t_args.option == "test_gen":
     print("testing model generation...")
