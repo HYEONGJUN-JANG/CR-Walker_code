@@ -594,7 +594,6 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
 
             for num in range(cur_batch_size):
                 itt=intent_label[num] if golden_intent else selected[num]
-<<<<<<< HEAD
                 try:
                     data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]}
                 except:
@@ -604,10 +603,8 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                     print(selected_2)
                     print(test_batch.my_id)
                     continue
-=======
                 # data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ With intent
-                data={'intent':" ",'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ Without intent
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
+                # data={'intent':" ",'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ Without intent
                 DA=da_tree_serial(data,args['id2name'])
                 if len(dataset[cnt].dialog_history)!=0:
                     context=dataset[cnt].dialog_history[-1]
@@ -624,14 +621,8 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 generated_utters.append(cur_turn)
                 cnt+=1
                 ### HJ : CONV_SAVE
-<<<<<<< HEAD
-                # save_conv('../convlog_CRWalkerModel_2.txt',test_batch.dialog_history[num],cur_turn['generated'], cur_turn['label'],gpt_in)
-
-=======
                 if args.get('save_conv_name'):
                     save_conv(f'../convlog_CRWalker_{args.get("save_conv_name")}.txt',test_batch.dialog_history[num],cur_turn['generated'], cur_turn['label'],gpt_in)
-                
->>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
     lines = [item['generated'].strip() for item in generated_utters]
     bleu_array = []
     f1_array = []
