@@ -67,10 +67,9 @@ class ProRec(nn.Module):
     def forward_pretrain(self,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,alignment_index,alignment_batch_index,alignment_label,intent_label,alignment_index_word=None,alignment_batch_index_word=None,alignment_label_word=None):
         
         utter_embed=self.utter_embedder.forward(tokenized_dialog,all_length,maxlen,init_hidden)
-        #last_utter=utter_embed[:,-1,:]
-        #print(last_utter)
+        
         intent=self.intent_selector.forward(utter_embed)
-        #print(alignment_index)
+        
         graph_embed,word_embed=self.graph_embedder.forward(edge_type,edge_index)
         graph_features=graph_embed.index_select(0,alignment_index)
         

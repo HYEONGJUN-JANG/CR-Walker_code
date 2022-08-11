@@ -546,15 +546,16 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     gener=Generator(args['gen_conf'])
     with torch.no_grad():
         for test_batch in tqdm(test_loader):
-            tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_indices,sel_batch_indices,sel_group_indices,grp_batch_indices,last_indices,intent_indices,intent_label,label_1,label_2,score_masks,word_index,word_batch_index=model.prepare_data_redial(test_batch.dialog_history,test_batch.mention_history,test_batch.intent,test_batch.node_candidate1,test_batch.node_candidate2,graph_data.edge_type,graph_data.edge_index,test_batch.label_1,test_batch.label_2,test_batch.gold_pos,args['attribute_dict'])
+            tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_indices,sel_batch_indices,sel_group_indices,grp_batch_indices,last_indices,intent_indices,intent_label,label_1,label_2,score_masks,word_index,word_batch_index = model.prepare_data_redial(
+                test_batch.dialog_history,test_batch.mention_history,test_batch.intent,test_batch.node_candidate1,test_batch.node_candidate2,graph_data.edge_type,graph_data.edge_index,test_batch.label_1,test_batch.label_2,test_batch.gold_pos,args['attribute_dict'])
 
-
+            # intent : [B,3]
             intent=model.get_intent(tokenized_dialog,all_length,maxlen,init_hidden)
-            selected=intent.max(dim=-1).indices
-            cur_batch_size=intent.size()[0]
+            selected=intent.max(dim=-1).indices # [B]
+            cur_batch_size=intent.size()[0] # int: B
             
             
-            if golden_intent:
+            if golden_intent: # Test_gen 에서 : False
                 step1,last_weight1,_=model.inference_redial(intent_indices[0],tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_indices[0],sel_batch_indices[0],sel_group_indices[0],grp_batch_indices[0],last_indices[0],score_masks,word_index,word_batch_index,layer=0)
                 step1=step1.cpu().numpy()
                 step_grp=sel_group_indices[0].cpu().numpy()
@@ -570,11 +571,11 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 step1i=step1i.cpu().numpy()
                 step_grp=grp_index_1i.cpu().numpy()
 
-                sel_index_2,grp_index_2,batch_index_2,intent_index_2,grp_bat_index_2,last_index_2,score_mask_2,node_candidate2,selected_1,all_split=select_layer_1(args['nodes'],step1i,step_grp,selected,node_candidate1i,test_batch.label_1,test_batch.mention_history,args)
+                sel_index_2,grp_index_2,batch_index_2,intent_index_2,grp_bat_index_2,last_index_2,score_mask_2,node_candidate2,selected_1,all_split = select_layer_1(args['nodes'],step1i,step_grp,selected,node_candidate1i,test_batch.label_1,test_batch.mention_history,args)
                 #print("sel_grp_index:",grp_index_2)
                 if grp_index_2.size()[0]!=0:
-                    step2,_,_=model.inference_redial(intent_index_2,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_index_2,batch_index_2,grp_index_2,grp_bat_index_2,last_index_2,score_mask_2,word_index,word_batch_index,last_weights=last_weight1i,layer=1)
-                    selected_2=select_layer_2(step2,grp_index_2.cpu().numpy(),grp_bat_index_2.cpu().numpy(),intent_index_2.cpu().numpy(),node_candidate2,cur_batch_size,args)
+                    step2,_,_ = model.inference_redial(intent_index_2,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_index_2,batch_index_2,grp_index_2,grp_bat_index_2,last_index_2,score_mask_2,word_index,word_batch_index,last_weights=last_weight1i,layer=1)
+                    selected_2 = select_layer_2(step2,grp_index_2.cpu().numpy(),grp_bat_index_2.cpu().numpy(),intent_index_2.cpu().numpy(),node_candidate2,cur_batch_size,args)
                 else:
                     selected_2=[[[]]]
 
@@ -593,13 +594,15 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
 
             for num in range(cur_batch_size):
                 itt=intent_label[num] if golden_intent else selected[num]
-                data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]}
+                # data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ With intent
+                data={'intent':" ",'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ Without intent
                 DA=da_tree_serial(data,args['id2name'])
                 if len(dataset[cnt].dialog_history)!=0:
                     context=dataset[cnt].dialog_history[-1]
                 else:
                     context="hello"
                 context=utter_lexical_redial(context,args['mid2name'])
+                # gpt_in=context+" @ "+DA+" &" ## HJ: Origin
                 gpt_in=context+" @ "+DA+" &"
                
                 all_gpt_in.append(gpt_in)
@@ -608,7 +611,10 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 generated_DAs.append(data)
                 generated_utters.append(cur_turn)
                 cnt+=1
-    
+                ### HJ : CONV_SAVE
+                if args.get('save_conv_name'):
+                    save_conv(f'../convlog_CRWalker_{args.get("save_conv_name")}.txt',test_batch.dialog_history[num],cur_turn['generated'], cur_turn['label'],gpt_in)
+                
     lines = [item['generated'].strip() for item in generated_utters]
     bleu_array = []
     f1_array = []
@@ -734,4 +740,13 @@ def evaluate_gen_gorecdial(test_loader:DataLoader, model:ProRec, graph_data, bow
 
     return Bleu,f1,dist
 
-
+# HJ CONV_SAVE
+def save_conv(path,hist,gen,label,gpt_in):
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write("<< Context >>\n")
+        for i in hist:
+            f.write(f'{i}\n')
+        f.write(f'Real_Resp: {label}\n')
+        f.write(f'Generated: {gen}\n')
+        f.write(f'GPT_input: {gpt_in}\n')
+        f.write("\n================< NEW LINE >================\n\n")
