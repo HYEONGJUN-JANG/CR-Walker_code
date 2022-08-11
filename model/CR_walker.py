@@ -70,6 +70,7 @@ class ProRec(nn.Module):
                          alignment_index, alignment_batch_index, alignment_label, intent_label,
                          alignment_index_word=None, alignment_batch_index_word=None, alignment_label_word=None):
 
+<<<<<<< HEAD
         utter_embed = self.utter_embedder.forward(tokenized_dialog, all_length, maxlen, init_hidden)
         # last_utter=utter_embed[:,-1,:]
         # print(last_utter)
@@ -77,6 +78,19 @@ class ProRec(nn.Module):
         # print(alignment_index)
         graph_embed, word_embed = self.graph_embedder.forward(edge_type, edge_index)
         graph_features = graph_embed.index_select(0, alignment_index)
+=======
+    def forward_pretrain(self,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,alignment_index,alignment_batch_index,alignment_label,intent_label,alignment_index_word=None,alignment_batch_index_word=None,alignment_label_word=None):
+        
+        utter_embed=self.utter_embedder.forward(tokenized_dialog,all_length,maxlen,init_hidden)
+        
+        intent=self.intent_selector.forward(utter_embed)
+        
+        graph_embed,word_embed=self.graph_embedder.forward(edge_type,edge_index)
+        graph_features=graph_embed.index_select(0,alignment_index)
+        
+        tiled_utter=self.graph_walker.tile_context(utter_embed,alignment_batch_index)
+        logits=torch.sum(self.Wa(tiled_utter)*graph_features,dim=-1)
+>>>>>>> 9714fa5369f03ca2e2e56a2e42427a77b35cbd3d
 
         tiled_utter = self.graph_walker.tile_context(utter_embed, alignment_batch_index)
         logits = torch.sum(self.Wa(tiled_utter) * graph_features, dim=-1)
