@@ -73,7 +73,7 @@ class ProRec(nn.Module):
         utter_embed = self.utter_embedder.forward(tokenized_dialog, all_length, maxlen, init_hidden)
         # last_utter=utter_embed[:,-1,:]
         # print(last_utter)
-        intent = self.intent_selector.forward(utter_embed)
+        intent = self.intent_selector.forward(utter_embed) # Default On
         # print(alignment_index)
         graph_embed, word_embed = self.graph_embedder.forward(edge_type, edge_index)
         graph_features = graph_embed.index_select(0, alignment_index)
@@ -89,9 +89,11 @@ class ProRec(nn.Module):
             word_features = word_embed.index_select(0, alignment_index_word)
             logits_w = torch.sum(self.Ww(tiled_utter_word) * word_features, dim=-1)
             loss_b = self.alignment_loss_word(logits_w, alignment_label_word)
-            return loss_a + loss_b + intent_loss
+            # return loss_a + loss_b + intent_loss # Default
+            return loss_a + loss_b
         else:
-            return loss_a + intent_loss
+            # return loss_a + intent_loss # Default
+            return loss_a
 
     def prepare_reg(self, mention_history, dialog_history, intent=None, rec_cand=None):
         alignment_index = []
@@ -300,8 +302,7 @@ class ProRec(nn.Module):
         # print("utterance_embedding:",utter_embed.size())
         graph_embed, word_embed = self.graph_embedder.forward(edge_type, edge_index)
         # print("graph_embedding:",graph_embed.size())
-        intent = self.intent_selector.forward(
-            utter_embed)  # ,graph_embeddings,mention_history,self.get_group_index(cur_type,"Candidate"),self.get_group_index(cur_type,"Attr"),graph_size)
+        intent = self.intent_selector.forward(utter_embed)  # ,graph_embeddings,mention_history,self.get_group_index(cur_type,"Candidate"),self.get_group_index(cur_type,"Attr"),graph_size)
         # print("intent:",intent.size())
         paths = self.graph_walker.forward(graph_embed, utter_embed, mention_index, mention_batch_index, sel_indices,
                                           sel_batch_indices, sel_group_indices, grp_batch_indices, last_indices,
@@ -309,7 +310,7 @@ class ProRec(nn.Module):
                                           word_batch_index=word_batch_index, word_index=word_index)
         walk_loss_1 = self.walk_loss_1(paths[0], label_1)
         walk_loss_2 = self.walk_loss_2(paths[1], label_2)
-        intent_loss = self.intent_loss(intent, intent_label)
+        # intent_loss = self.intent_loss(intent, intent_label) # Default
 
         graph_features = graph_embed.index_select(0, alignment_index)
         tiled_utter = self.graph_walker.tile_context(utter_embed, alignment_batch_index)
@@ -325,7 +326,8 @@ class ProRec(nn.Module):
         # print(logits)
         # logits=logits+self.Wo.bias.index_select(0,alignment_index)
 
-        tot_loss = walk_loss_1 + walk_loss_2 + intent_loss + 0.025 * reg_loss  #
+        # tot_loss = walk_loss_1 + walk_loss_2 + intent_loss + 0.025 * reg_loss  # Default
+        tot_loss = walk_loss_1 + walk_loss_2 + 0.025 * reg_loss  #
         return intent, paths, tot_loss
 
     def forward_gorecdial(self, tokenized_dialog, all_length, maxlen, init_hidden, edge_type, edge_index, mention_index,
