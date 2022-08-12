@@ -81,6 +81,7 @@ elif sysChecker=="Windows":
     test_loader = DataLoader(redial_test, batch_size=4, shuffle=False) # HJ local
 else:
     print("Check Your Platform and use right DataLoader")
+    exit()
 # train_loader = DataLoader(redial_train, batch_size=200, shuffle=True) # Default
 # test_loader = DataLoader(redial_test, batch_size=200, shuffle=False) # Default
 
