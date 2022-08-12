@@ -94,7 +94,7 @@ def sample_sequence(model, length, context, num_samples=1, temperature=1, top_k=
                 next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
             generated = torch.cat((generated, next_token), dim=1)
     return generated
-    
+
 
 
 set_seed(42)
@@ -139,4 +139,4 @@ class Generator():
             text = self.tokenizer.decode(o, clean_up_tokenization_spaces=True)
             text = text[: text.find(stop_token) if stop_token else None]
 
-        return text
+        return text,list(filter(lambda x : x != 50256, out))

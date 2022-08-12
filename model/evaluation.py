@@ -615,7 +615,8 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 gpt_in=context+" @ "+DA+" &"
                
                 all_gpt_in.append(gpt_in)
-                generated=gener.generate(gpt_in.lower())
+                generated, outTok=gener.generate(gpt_in.lower())
+                # generated=gener.generate(gpt_in.lower()) # Default
                 cur_turn={"generated":generated,"label":utter_lexical_redial(dataset[cnt].oracle_response,args['mid2name'])}
                 generated_DAs.append(data)
                 generated_utters.append(cur_turn)
@@ -665,19 +666,19 @@ def evaluate_gen_gorecdial(test_loader:DataLoader, model:ProRec, graph_data, bow
             intent=model.get_intent(tokenized_dialog,all_length,maxlen,init_hidden)
             selected=intent.max(dim=-1).indices
             cur_batch_size=intent.size()[0]
-            
-            
+
+
             if golden_intent:
                 step1,last_weight1,_,_=model.inference_gorecdial(intent_indices[0],tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_indices[0],sel_batch_indices[0],sel_group_indices[0],grp_batch_indices[0],last_indices[0],score_masks,word_index,word_batch_index,bow_embed,rec_index,rec_batch_index)
 
                 step1=step1.cpu().numpy()
                 step_grp=sel_group_indices[0].cpu().numpy()
-                
+
                 sel_index_2,grp_index_2,batch_index_2,intent_index_2,grp_bat_index_2,last_index_2,score_mask_2,node_candidate2,selected_1,all_split=select_layer_1(args['nodes'],step1,step_grp,intent_label,test_batch.node_candidate1,test_batch.label_1,test_batch.mention_history,args,test_batch.rec_cand,dataset="gorecdial")
                 step2,_,_=model.inference_gorecdial(intent_index_2,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_index_2,batch_index_2,grp_index_2,grp_bat_index_2,last_index_2,score_mask_2,word_index,word_batch_index,last_weights=last_weight1,layer=1)
 
                 selected_2=select_layer_2(step2,grp_index_2.cpu().numpy(),grp_bat_index_2.cpu().numpy(),intent_index_2.cpu().numpy(),node_candidate2,cur_batch_size,args)
-                
+
             else:
                 sel_index_1i,grp_index_1i,batch_index_1i,grp_bat_index_1i,last_index_1i,node_candidate1i,score_mask1i=select_intent(selected,test_batch.mention_history,args)
                 step1i,last_weight1i,_,_=model.inference_gorecdial(selected,tokenized_dialog,all_length,maxlen,init_hidden,edge_type,edge_index,mention_index,mention_batch_index,sel_index_1i,batch_index_1i,grp_index_1i,grp_bat_index_1i,last_index_1i,score_mask1i,word_index,word_batch_index,bow_embed,rec_index,rec_batch_index)
@@ -690,7 +691,7 @@ def evaluate_gen_gorecdial(test_loader:DataLoader, model:ProRec, graph_data, bow
                     selected_2=select_layer_2(step2,grp_index_2.cpu().numpy(),grp_bat_index_2.cpu().numpy(),intent_index_2.cpu().numpy(),node_candidate2,cur_batch_size,args)
                 else:
                     selected_2=[[[]]]
-            
+
             for i in range(len(selected_1)):
                 for j in range(len(selected_1[i])):
                     selected_1[i][j]=int(selected_1[i][j])
@@ -711,7 +712,7 @@ def evaluate_gen_gorecdial(test_loader:DataLoader, model:ProRec, graph_data, bow
                     context="hello"
                 context=utter_lexical_redial(context,args['mid2name'])
                 gpt_in=context+" @ "+DA+" &"
-               
+
                 all_gpt_in.append(gpt_in)
                 generated=gener.generate(gpt_in.lower())
                 cur_turn={"generated":generated,"label":utter_lexical_gorecdial(dataset[cnt].oracle_response,args['mid2name'])}
@@ -720,12 +721,12 @@ def evaluate_gen_gorecdial(test_loader:DataLoader, model:ProRec, graph_data, bow
                 generated_DAs.append(data)
                 generated_utters.append(cur_turn)
                 cnt+=1
-    
+
 
     lines = [item['generated'].strip() for item in generated_utters]
     bleu_array = []
     f1_array = []
-    
+
     k=0
     for item in generated_utters:
         k+=1

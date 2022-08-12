@@ -51,7 +51,7 @@ if t_args.save_conv_name:
     print("Test Conv Log File : ",args.get('save_conv_name'))
 print(t_args)
 # exit()
-# t_args.option = 'test_gen'
+t_args.option = 'test_gen'
 
 # t_args.option = 'test_gen'
 
