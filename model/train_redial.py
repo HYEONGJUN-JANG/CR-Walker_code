@@ -6,6 +6,7 @@ from conf import add_generic_args, args
 from entity_linker import match_nodes
 from data.utils import da_tree_serial, utter_lexical_redial, utter_lexical_gorecdial
 from copy import deepcopy
+from platform import system as sysChecker
 
 sys.path.append("..")
 from data.utils import da_tree_serial
@@ -72,9 +73,14 @@ redial_graph = ReDial(path, flag="graph")
 redial_rec = ReDial(path, flag="rec")
 graph_data = redial_graph[0]
 # HJ: default batch_size=20
-# train_loader = DataLoader(redial_train, batch_size=400, shuffle=True) # HJ KT-server
-train_loader = DataLoader(redial_train, batch_size=4, shuffle=True) # HJ local
-test_loader = DataLoader(redial_test, batch_size=4, shuffle=False)
+if sysChecker() == 'Linux':
+    train_loader = DataLoader(redial_train, batch_size=400, shuffle=True) # HJ KT-server
+    test_loader = DataLoader(redial_test, batch_size=400, shuffle=False) # HJ KT-server
+elif sysChecker=="Windows":
+    train_loader = DataLoader(redial_train, batch_size=4, shuffle=True) # HJ local
+    test_loader = DataLoader(redial_test, batch_size=4, shuffle=False) # HJ local
+else:
+    print("Check Your Platform and use right DataLoader")
 # train_loader = DataLoader(redial_train, batch_size=200, shuffle=True) # Default
 # test_loader = DataLoader(redial_test, batch_size=200, shuffle=False) # Default
 
