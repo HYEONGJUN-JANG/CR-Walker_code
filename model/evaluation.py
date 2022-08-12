@@ -18,7 +18,8 @@ from data.redial import ReDial
 from data.gorecdial import GoRecDial
 from data.metrics import bleu,f1_score,distinct_n_grams
 from data.utils import da_tree_serial,utter_lexical_redial,utter_lexical_gorecdial
-
+from sklearn.metrics import precision_score, recall_score
+from sklearn.metrics import f1_score as f1_rec_score
 
 def select_intent(sel_intent,mentioned,args):
     device=torch.device('cuda:0')
@@ -542,6 +543,8 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     generated_utters=[]
     all_gpt_in=[]
     cnt=0
+    f1_rec_trues=[]
+    f1_rec_preds=[]
     from generator import Generator
     gener=Generator(args['gen_conf'])
     with torch.no_grad():
@@ -594,6 +597,9 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
 
             for num in range(cur_batch_size):
                 itt=intent_label[num] if golden_intent else selected[num]
+                ## HJ: F1_rec Code
+                f1_rec_preds.append(1 if all_intent[itt]=='recommend' else 0)
+                f1_rec_trues.append(1 if test_batch.intent[num]=='recommend' else 0)
                 try:
                     data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]}
                 except:
@@ -638,10 +644,13 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     Bleu=np.mean(bleu_array)
     f1=np.mean(f1_array)
     dist=[]
-    print("BLEU:",Bleu)
-    print("F1:",f1)
-
-
+    print("\nBLEU:",round(Bleu,3))
+    print("\nF1:",round(f1,3))
+    print(f'\nPrecision : {round(precision_score(f1_rec_trues, f1_rec_preds),3)}')
+    print(f'Recall : {round(recall_score(f1_rec_trues, f1_rec_preds),3)}')
+    print(f'F1_Rec_score : {round(f1_rec_score(f1_rec_trues, f1_rec_preds),3)}')
+    print(f'Total Test Rec True Counter {len(list(filter(lambda x : x==1, f1_rec_trues)))}')
+    print(f'Total Test Rec Pred Counter {len(list(filter(lambda x : x==1, f1_rec_preds)))}')
     tokenized = [line.split() for line in lines]
     for n in range(1, 6):
         cnt, percent = distinct_n_grams(tokenized, n)
