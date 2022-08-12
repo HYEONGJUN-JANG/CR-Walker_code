@@ -72,8 +72,8 @@ redial_rec = ReDial(path, flag="rec")
 graph_data = redial_graph[0]
 # HJ: default batch_size=20
 if sysChecker() == 'Linux':
-    train_loader = DataLoader(redial_train, batch_size=400, shuffle=True) # HJ KT-server
-    test_loader = DataLoader(redial_test, batch_size=400, shuffle=False) # HJ KT-server
+    train_loader = DataLoader(redial_train, batch_size=256, shuffle=True) # HJ KT-server
+    test_loader = DataLoader(redial_test, batch_size=256, shuffle=False) # HJ KT-server
 elif sysChecker() =="Windows":
     train_loader = DataLoader(redial_train, batch_size=4, shuffle=True) # HJ local
     test_loader = DataLoader(redial_test, batch_size=4, shuffle=False) # HJ local
