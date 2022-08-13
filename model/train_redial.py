@@ -42,10 +42,13 @@ parser.add_argument("--lr", type=float, default=5e-4)
 parser.add_argument("--weight_decay", type=float, default=0.01)
 parser.add_argument("--eval_batch", type=int, default=100)
 parser.add_argument("--word_net", action='store_true')
-
+#HJ Parser Change
 parser.add_argument("--save_conv_name", type=str, default='', help="if any string , it save conversation in test ")
+parser.add_argument("--with_intent", type=bool, default=True, help="if True, GPT Input with intent else without intent")
 
 t_args = parser.parse_args()
+t_args.with_intent=True # Intent Setting
+args['with_intent']=t_args.with_intent # HJ Intent 를 넣을지 말지 결정
 # t_args.save_conv_name=' '
 if t_args.save_conv_name:
     args['save_conv_name'] = t_args.save_conv_name

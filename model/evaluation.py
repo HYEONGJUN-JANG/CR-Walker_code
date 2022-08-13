@@ -545,6 +545,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     cnt=0
     f1_rec_trues=[]
     f1_rec_preds=[]
+    print("With Intent" if args.get('with_intent') else "***********Without Intent**********")
     from generator import Generator
     gener=Generator(args['gen_conf'])
     with torch.no_grad():
@@ -601,7 +602,11 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 f1_rec_preds.append(1 if all_intent[itt]=='recommend' else 0)
                 f1_rec_trues.append(1 if test_batch.intent[num]=='recommend' else 0)
                 try:
-                    data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]}
+                    if args.get('with_intent'):
+                        # data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # Default
+                        data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ With intent
+                    else:
+                        data={'intent':" ",'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ Without intent
                 except:
                     print(itt,"  ",num)
                     print(all_intent)
@@ -609,8 +614,6 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                     print(selected_2)
                     print(test_batch.my_id)
                     continue
-                # data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ With intent
-                # data={'intent':" ",'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ Without intent
                 DA=da_tree_serial(data,args['id2name'])
                 if len(dataset[cnt].dialog_history)!=0:
                     context=dataset[cnt].dialog_history[-1]
