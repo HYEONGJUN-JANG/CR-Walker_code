@@ -546,7 +546,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     cnt=0
     f1_rec_trues=[]
     f1_rec_preds=[]
-    print("With Intent" if args.get('with_intent') else "***********Without Intent**********")
+    print("With Intent" if args.get('with_intent')=='True' else "***********Without Intent**********")
     from generator import Generator
     gener=Generator(args['gen_conf'])
     with torch.no_grad():
@@ -603,7 +603,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 f1_rec_preds.append(1 if all_intent[itt]=='recommend' else 0)
                 f1_rec_trues.append(1 if test_batch.intent[num]=='recommend' else 0)
                 try:
-                    if args.get('with_intent'):
+                    if args.get('with_intent')=='True':
                         # data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # Default
                         data={'intent':all_intent[itt],'layer1':selected_1[num],'layer2':selected_2[num],'key':test_batch.my_id[num]} # HJ With intent
                     else:

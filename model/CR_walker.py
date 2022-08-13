@@ -14,7 +14,7 @@ class ProRec(nn.Module):
     # beta=tanh(QW+KU)*V
     def __init__(self, device_str='cuda:1', rnn_type="RNN_TANH", use_bert=True, utter_embed_size=64, dropout=0.5,
                  num_turns=10, num_relations=12, num_bases=15, graph_embed_size=64, atten_hidden=20,
-                 negative_sample_ratio=5, dataset="redial", word_net=False):
+                 negative_sample_ratio=5, dataset="redial", word_net=False, with_intent=True):
         super(ProRec, self).__init__()
         self.dataset = dataset
         if dataset == "redial":
@@ -65,6 +65,8 @@ class ProRec(nn.Module):
         self.Wa = nn.Linear(utter_embed_size, graph_embed_size, bias=False)
         self.Ww = nn.Linear(utter_embed_size, graph_embed_size, bias=False)
         # self.Wo=nn.Linear(1,self.num_nodes)
+        ## HJ  Intent Setting ProRec
+        self.with_intent=with_intent
 
     def forward_pretrain(self, tokenized_dialog, all_length, maxlen, init_hidden, edge_type, edge_index,
                          alignment_index, alignment_batch_index, alignment_label, intent_label,
@@ -89,11 +91,11 @@ class ProRec(nn.Module):
             word_features = word_embed.index_select(0, alignment_index_word)
             logits_w = torch.sum(self.Ww(tiled_utter_word) * word_features, dim=-1)
             loss_b = self.alignment_loss_word(logits_w, alignment_label_word)
-            # return loss_a + loss_b + intent_loss # Default
-            return loss_a + loss_b
+            if self.with_intent: return loss_a + loss_b + intent_loss # Default
+            else: return loss_a + loss_b
         else:
-            # return loss_a + intent_loss # Default
-            return loss_a
+            if self.with_intent: return loss_a + intent_loss # Default
+            else: return loss_a
 
     def prepare_reg(self, mention_history, dialog_history, intent=None, rec_cand=None):
         alignment_index = []
@@ -310,7 +312,7 @@ class ProRec(nn.Module):
                                           word_batch_index=word_batch_index, word_index=word_index)
         walk_loss_1 = self.walk_loss_1(paths[0], label_1)
         walk_loss_2 = self.walk_loss_2(paths[1], label_2)
-        # intent_loss = self.intent_loss(intent, intent_label) # Default
+        intent_loss = self.intent_loss(intent, intent_label) # Default
 
         graph_features = graph_embed.index_select(0, alignment_index)
         tiled_utter = self.graph_walker.tile_context(utter_embed, alignment_batch_index)
@@ -326,8 +328,10 @@ class ProRec(nn.Module):
         # print(logits)
         # logits=logits+self.Wo.bias.index_select(0,alignment_index)
 
-        # tot_loss = walk_loss_1 + walk_loss_2 + intent_loss + 0.025 * reg_loss  # Default
-        tot_loss = walk_loss_1 + walk_loss_2 + 0.025 * reg_loss  #
+        if self.with_intent:
+            tot_loss = walk_loss_1 + walk_loss_2 + intent_loss + 0.025 * reg_loss  # Default
+        else:
+            tot_loss = walk_loss_1 + walk_loss_2 + 0.025 * reg_loss  #
         return intent, paths, tot_loss
 
     def forward_gorecdial(self, tokenized_dialog, all_length, maxlen, init_hidden, edge_type, edge_index, mention_index,

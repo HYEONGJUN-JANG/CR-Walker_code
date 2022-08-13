@@ -51,11 +51,11 @@ parser.add_argument("--eval_batch", type=int, default=100)
 parser.add_argument("--word_net", action='store_true')
 #HJ Parser Change
 parser.add_argument("--save_conv_name", type=str, default='', help="if any string , it save conversation in test ")
-parser.add_argument("--with_intent", type=bool, default=True, help="if True, GPT Input with intent else without intent")
+parser.add_argument("--with_intent", type=str, default='True', help="if True, GPT Input with intent else without intent")
 
 t_args = parser.parse_args()
-t_args.with_intent=True # Intent Setting
-args['with_intent']=t_args.with_intent # HJ Intent 를 넣을지 말지 결정
+t_args.with_intent='True' # Intent Setting
+args['with_intent'] = t_args.with_intent # HJ Intent 를 넣을지 말지 결정
 # t_args.save_conv_name=' '
 if t_args.save_conv_name:
     args['save_conv_name'] = t_args.save_conv_name
@@ -95,7 +95,7 @@ add_generic_args()
 if t_args.option == "train":
     prorec = ProRec(device_str=device_str, graph_embed_size=t_args.graph_embed_size,
                     utter_embed_size=t_args.utter_embed_size, negative_sample_ratio=t_args.negative_sample_ratio,
-                    atten_hidden=t_args.atten_hidden, word_net=t_args.word_net)
+                    atten_hidden=t_args.atten_hidden, word_net=t_args.word_net, with_intent=True if args['with_intent']=='True' else False)
     if t_args.restore_best:
         print("restoring from best checkpoint...")
         state_dict = torch.load(save_path)
@@ -215,7 +215,7 @@ elif t_args.option == "test":
         print(key)
     prorec = ProRec(device_str=device_str, graph_embed_size=t_args.graph_embed_size,
                     utter_embed_size=t_args.utter_embed_size, negative_sample_ratio=t_args.negative_sample_ratio,
-                    word_net=t_args.word_net)
+                    word_net=t_args.word_net, with_intent=True if args['with_intent']=='True' else False)
     prorec.load_state_dict(state_dict, strict=False)
     prorec.eval()
     prorec.to(device)
@@ -240,7 +240,7 @@ elif t_args.option == "test_gen":
         print(key)
     prorec = ProRec(device_str=device_str, graph_embed_size=t_args.graph_embed_size,
                     utter_embed_size=t_args.utter_embed_size, negative_sample_ratio=t_args.negative_sample_ratio,
-                    word_net=t_args.word_net)
+                    word_net=t_args.word_net, with_intent=True if args['with_intent']=='True' else False)
     prorec.load_state_dict(state_dict, strict=False)
     prorec.eval()
     prorec.to(device)
