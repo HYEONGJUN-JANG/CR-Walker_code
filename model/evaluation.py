@@ -538,6 +538,7 @@ def evaluate_rec_gorecdial(test_loader:DataLoader, model:ProRec,graph_data, bow_
 
 
 def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, golden_intent=True):
+    from train_redial import get_time_kst, save_logs
     model.eval()
     generated_DAs=[]
     generated_utters=[]
@@ -654,7 +655,14 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     print(f'F1_Rec_score : {round(f1_rec_score(f1_rec_trues, f1_rec_preds),3)}')
     print(f'Total Test Rec True Counter {len(list(filter(lambda x : x==1, f1_rec_trues)))}')
     print(f'Total Test Rec Pred Counter {len(list(filter(lambda x : x==1, f1_rec_preds)))}')
-    print(f'Total Counter {len(f1_rec_preds)}')
+    save_logs(f"Original Code BLEU : {round(Bleu,3)}, F1 : {round(f1,3)}", args.get('test_gen_log_path'))
+    save_logs(f"Precision : {round(precision_score(f1_rec_trues, f1_rec_preds),3)}", args.get('test_gen_log_path'))
+    save_logs(f"Recall : {round(recall_score(f1_rec_trues, f1_rec_preds),3)}", args.get('test_gen_log_path'))
+    save_logs(f'F1_Rec_score : {round(f1_rec_score(f1_rec_trues, f1_rec_preds),3)}',args.get('test_gen_log_path'))
+    save_logs(f'Total Test Rec True Counter {len(list(filter(lambda x : x==1, f1_rec_trues)))}',args.get('test_gen_log_path'))
+    save_logs(f'Total Test Rec Pred Counter {len(list(filter(lambda x : x==1, f1_rec_preds)))}',args.get('test_gen_log_path'))
+    save_logs(f'Total Counter {len(f1_rec_preds)}',args.get('test_gen_log_path'))
+
     tokenized = [line.split() for line in lines]
     for n in range(1, 6):
         cnt, percent = distinct_n_grams(tokenized, n)

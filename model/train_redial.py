@@ -1,3 +1,4 @@
+import os.path
 import sys
 from transformers import BertModel, BertTokenizer
 from CR_walker import ProRec
@@ -21,6 +22,12 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from tqdm import trange, tqdm
 from torch_geometric.data import DataLoader
+from pytz import timezone
+from datetime import datetime
+def get_time_kst(): return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+def save_logs(string, path):
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write(f"{get_time_kst()} -- {string}\n")
 
 device_str = 'cuda:0'
 device = torch.device(device_str)
@@ -56,9 +63,6 @@ if t_args.save_conv_name:
 print(t_args)
 # exit()
 # t_args.option = 'test_gen'
-
-option = t_args.option
-model_name = t_args.model_name
 
 option = t_args.option
 model_name = t_args.model_name
@@ -221,6 +225,15 @@ elif t_args.option == "test":
 
 elif t_args.option == "test_gen":
     print("testing model generation...")
+    # HJ  Test_gen log 남기도록!
+    test_gen_log_path=osp.join(root,'logs','test_gen_logs.txt')
+    args['test_gen_log_path'] = test_gen_log_path
+    save_logs("-----------------------------------------------------",test_gen_log_path)
+    save_logs("---------------------<New Start>---------------------",test_gen_log_path)
+    with open(test_gen_log_path, 'a', encoding='utf-8') as b_result_f:
+        for i, v in vars(t_args).items():
+            b_result_f.write(f'{i}:{v} || ')
+    save_logs(" ",test_gen_log_path)
     state_dict = torch.load(save_path, map_location=device_str)
 
     for key in state_dict.keys():
@@ -231,4 +244,9 @@ elif t_args.option == "test_gen":
     prorec.load_state_dict(state_dict, strict=False)
     prorec.eval()
     prorec.to(device)
+    save_logs("---------------------------------------------------",test_gen_log_path)
+    save_logs("---------------<evaluate_gen_redial>---------------",test_gen_log_path)
     evaluate_gen_redial(test_loader, prorec, graph_data, args, golden_intent=False)
+    save_logs("---------------------------------------------------",test_gen_log_path)
+    save_logs("---------------------<THE END>---------------------",test_gen_log_path)
+    save_logs("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",test_gen_log_path)
