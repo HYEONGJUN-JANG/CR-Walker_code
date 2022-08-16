@@ -24,7 +24,7 @@ from tqdm import trange, tqdm
 from torch_geometric.data import DataLoader
 from pytz import timezone
 from datetime import datetime
-def get_time_kst(): return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+def get_time_kst(): return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d_%H:%M:%S')
 def save_logs(string, path):
     with open(path, 'a', encoding='utf-8') as f:
         f.write(f"{get_time_kst()} -- {string}\n")
@@ -226,7 +226,7 @@ elif t_args.option == "test":
 elif t_args.option == "test_gen":
     print("testing model generation...")
     # HJ  Test_gen log 남기도록!
-    test_gen_log_path=osp.join(root,'logs','test_gen_logs.txt')
+    test_gen_log_path=osp.join(root,'logs',f'{get_time_kst()}_test_gen_logs.txt')
     args['test_gen_log_path'] = test_gen_log_path
     save_logs("-----------------------------------------------------",test_gen_log_path)
     save_logs("---------------------<New Start>---------------------",test_gen_log_path)
