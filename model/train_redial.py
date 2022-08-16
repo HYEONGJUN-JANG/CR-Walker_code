@@ -24,7 +24,7 @@ from tqdm import trange, tqdm
 from torch_geometric.data import DataLoader
 from pytz import timezone
 from datetime import datetime
-def get_time_kst(): return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d_%H:%M:%S')
+def get_time_kst(): return datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d_%H%M%S')
 def save_logs(string, path):
     with open(path, 'a', encoding='utf-8') as f:
         f.write(f"{get_time_kst()} -- {string}\n")
