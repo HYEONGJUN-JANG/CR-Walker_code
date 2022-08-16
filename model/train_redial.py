@@ -188,19 +188,19 @@ if t_args.option == "train":
                 stats_all['recall_10'].append(recall_10)
                 stats_all['recall_50'].append(recall_50)
 
-                if recall_1 > best_recall_1:
-                    best_recall_1 = recall_1
-                    print("saving model...")
-                    torch.save(prorec.state_dict(), save_path_1)
-                    torch.save(prorec.state_dict(), save_path)
+                # if recall_1 > best_recall_1:
+                #     best_recall_1 = recall_1
+                #     print("saving model...")
+                #     torch.save(prorec.state_dict(), save_path_1)
+                #     torch.save(prorec.state_dict(), save_path)
                 if recall_10 > best_recall_10:
                     best_recall_10 = recall_10
                     print("saving model...")
                     torch.save(prorec.state_dict(), save_path_10)
-                if recall_50 > best_recall_50:
-                    best_recall_50 = recall_50
-                    print("saving model...")
-                    torch.save(prorec.state_dict(), save_path_50)
+                # if recall_50 > best_recall_50:
+                #     best_recall_50 = recall_50
+                #     print("saving model...")
+                #     torch.save(prorec.state_dict(), save_path_50)
                 prorec.train()
                 f = open('stats_' + model_name + '.json', 'w')
                 json.dump(stats_all, f)
