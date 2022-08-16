@@ -596,7 +596,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
             all_intent=['chat','question','recommend']
 
             dataset=ReDial(args['data_path'],flag="test")
-
+            hellocnt=0## HJ : TEST HELLO COUNT
             for num in range(cur_batch_size):
                 itt=intent_label[num] if golden_intent else selected[num]
                 ## HJ: F1_rec Code
@@ -620,6 +620,8 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                     context=dataset[cnt].dialog_history[-1]
                 else:
                     context="hello"
+                    hellocnt+=1 ## HJ : TEST HELLO COUNT
+
                 context=utter_lexical_redial(context,args['mid2name'])
                 # gpt_in=context+" @ "+DA+" &" ## HJ: Origin
                 gpt_in=context+" @ "+DA+" &"
@@ -662,6 +664,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
     save_logs(f'Total Test Rec True Counter {len(list(filter(lambda x : x==1, f1_rec_trues)))}',args.get('test_gen_log_path'))
     save_logs(f'Total Test Rec Pred Counter {len(list(filter(lambda x : x==1, f1_rec_preds)))}',args.get('test_gen_log_path'))
     save_logs(f'Total Counter {len(f1_rec_preds)}',args.get('test_gen_log_path'))
+    save_logs(f'First Hello Count : {hellocnt}',args.get('test_gen_log_path'))
 
     tokenized = [line.split() for line in lines]
     for n in range(1, 6):

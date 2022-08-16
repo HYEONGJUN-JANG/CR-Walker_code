@@ -230,6 +230,8 @@ elif t_args.option == "test_gen":
     args['test_gen_log_path'] = test_gen_log_path
     save_logs("-----------------------------------------------------",test_gen_log_path)
     save_logs("---------------------<New Start>---------------------",test_gen_log_path)
+    save_logs(f"{sys.argv}",test_gen_log_path)
+    save_logs("-----------------------------------------------------",test_gen_log_path)
     with open(test_gen_log_path, 'a', encoding='utf-8') as b_result_f:
         for i, v in vars(t_args).items():
             b_result_f.write(f'{i}:{v} || ')
