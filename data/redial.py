@@ -46,7 +46,8 @@ class ReDial(InMemoryDataset):
         train_reason_path=json.load(f)
         f=open(graph_path)
         graph=json.load(f)
-        flags=['train','test']
+        flags=['train','test'] # Default
+        # flags=['test','train'] # HJ test
 
         relations_names=['time', 'director', 'starring', 'genre', 'subject', 'belong', 'timeR', 'directorR', 'starringR', 'genreR', 'subjectR', 'belongR']
         type_names = ["Candidate","Movie","Actor","Director","Genre","Time","Attr","Subject","None"]
@@ -59,6 +60,13 @@ class ReDial(InMemoryDataset):
                 reason_path=train_reason_path
             else:
                 reason_path=test_reason_path
+            if flag=='test': print("TEST")
+            # HJ Test dataset Dialog System Start 카운트 -> 890개
+            # ctx0cnt=0
+            # for idx in tqdm(range(len(reason_path)), bar_format=' {percentage:3.0f} % | {bar:23} {r_bar}'):
+            #     if len(reason_path[idx].get('context'))==0 and flag=='test':
+            #         ctx0cnt+=1
+            # print(ctx0cnt)
             for idx in tqdm(range(len(reason_path)), bar_format=' {percentage:3.0f} % | {bar:23} {r_bar}'):
                 last_turn=0
                 if idx==len(reason_path)-1:

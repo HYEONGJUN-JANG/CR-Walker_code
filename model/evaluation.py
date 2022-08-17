@@ -474,7 +474,7 @@ def evaluate_gen_redial(test_loader:DataLoader, model:ProRec, graph_data, args, 
                 DA=da_tree_serial(data,args['id2name'])
                 if len(dataset[cnt].dialog_history)!=0:
                     context=dataset[cnt].dialog_history[-1]
-                else:
+                else: # len 이 0일때 -> 첫발화일때??인지 체크해보기
                     context="hello"
                     hellocnt+=1 ## HJ : TEST HELLO COUNT
 
